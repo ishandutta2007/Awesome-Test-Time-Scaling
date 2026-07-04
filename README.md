@@ -13,7 +13,11 @@ The technical optimization of sequential model sharding has transitioned from ba
 
 
 ```mermaid
-[Naive Layer Splitting (2014-2016)] ───> [Synchronous 1F1B (GPipe, 2019)] ───> [Interleaved 1F1B (Megatron-LM, 2021)] ───> [Zero-Bubble PP / Offload (2024+)](100% Inter-Node Hardware Stalls)          (Symmetric Bounded Micro-Batch Bubbles)       (Interleaved Layer Chunks / Bubble Slashed)       (Asynchronous Activation Offloading Loops)
+flowchart LR
+    A["Naive Layer Splitting (2014–2016)<br/>(Large Pipeline Bubbles & Idle Accelerators)"]
+    --> B["GPipe (2019)<br/>(Synchronous Micro-Batch Pipeline Parallelism)"]
+    --> C["Interleaved 1F1B (Megatron-LM, 2021)<br/>(Interleaved Scheduling & Reduced Pipeline Bubbles)"]
+    --> D["Zero-Bubble Pipeline & Offloading (2024+)<br/>(Near-Zero Bubbles & Asynchronous Activation Offloading)"]
 ```
 
 
@@ -56,7 +60,32 @@ To synchronize layer parameters across disjointed hardware nodes seamlessly, pip
 
 
 ```mermaid
-Interleaved 1F1B Execution GridMicro-Batches (1, 2, 3, 4...) ───>GPU 0: │ F₁ │ F₂ │ F₃ │ F₄ │ B₁ │ B₂ │ B₃ │ B₄ │ ───┐GPU 1: │ ░  │ F₁ │ F₂ │ F₃ │ F₄ │ B₁ │ B₂ │ B₃ │ B₄ │ ├──> [P2P Tensor Communication via NCCL]GPU 2: │ ░  │ ░  │ F₁ │ F₂ │ F₃ │ F₄ │ B₁ │ B₂ │ B₃ │ B₄ │└──────────────────────────────────────────────┘░ = Pipeline Bubble (Idle Hardware Stalls)
+flowchart TB
+
+A["Micro-Batches (1, 2, 3, 4, …)"]
+
+A --> G0
+A --> G1
+A --> G2
+
+subgraph G0["GPU 0"]
+    G0A["F₁ → F₂ → F₃ → F₄ → B₁ → B₂ → B₃ → B₄"]
+end
+
+subgraph G1["GPU 1"]
+    G1A["Bubble → F₁ → F₂ → F₃ → F₄ → B₁ → B₂ → B₃ → B₄"]
+end
+
+subgraph G2["GPU 2"]
+    G2A["Bubble → Bubble → F₁ → F₂ → F₃ → F₄ → B₁ → B₂ → B₃ → B₄"]
+end
+
+G0 --> N["Peer-to-Peer Tensor Communication (NCCL)"]
+G1 --> N
+G2 --> N
+
+L["Bubble = Pipeline Stall (Idle GPU)"] -.-> G1
+L -.-> G2
 ```
 
 *   **Peer-to-Peer (P2P) Communication Primitives**
