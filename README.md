@@ -1,6 +1,15 @@
 ![Banner](./assets/banner.svg)
 
 # 🚀 Awesome-Test-Time-Scaling
+
+<div align="center">
+<a href="https://github.com/ishandutta2007/Awesome-Awesome-Awesome"><img src="https://img.shields.io/badge/Awesome-%E2%9C%94-blueviolet?style=flat-square&logo=github" alt="Awesome"/></a>
+<a href="https://discord.gg/jc4xtF58Ve"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" /></a>
+<!-- BADGES_RIGHT -->
+</div>
+
+**A curated collection of resources, papers, architectures, and variants focusing on Pipeline Parallelism in AI, model sharding, and trillion-parameter foundation models training.**
+
 ## 🧠 Pipeline Parallelism in AI: History, Progression, Variants, & Applications
 
 Pipeline Parallelism (PP) is a foundational distributed model-parallel hardware architecture designed to shard large-scale deep learning networks across multiple computing nodes (GPUs/TPUs). When an artificial intelligence architecture’s parameter scale is too massive to fit within the physical Video RAM (VRAM) boundary of a single standalone GPU, Pipeline Parallelism cuts the model's structural layer blocks sequentially into independent partitions distributed across a linear array of devices. 
